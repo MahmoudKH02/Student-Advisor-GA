@@ -4,6 +4,8 @@ import json
 
 class Course:
 
+    num_courses = 0
+    
     def __init__( self, course_id=None, credit_hours=None, prerequisists=[] ):
         self.__id = course_id
         self.__credit_hours = credit_hours
@@ -58,8 +60,7 @@ class Course:
 
 
     def __repr__(self) -> str:
-        if hasattr(self, 'group'):
-            s = f'| Group: {self.group}'
+        s = f'| Group: {self.group}' if hasattr(self, 'group') else ''
 
         return f'CourseCode: {self.__id} | Credit Hours: {self.__credit_hours} {s} \
             \nPreReq: {self.__prerequisists} | Priority: {self.__priority}\n \
@@ -166,8 +167,8 @@ class Section:
         """
         return self.__days.intersection( other_section.get_days() ) \
             and ( 
-                (self.__start_time < other_section.get_end_time())
-                or (self.__end_time > other_section.get_start_time())
+                (other_section.get_start_time() <= self.__start_time < other_section.get_end_time())
+                or (other_section.get_start_time() < self.__end_time <= other_section.get_end_time())
             )
 
 
@@ -188,7 +189,7 @@ def read_sections(filename, compulsory_courses: dict[str, Course], elective_cour
     Returns:
         other_courses -- a dictionary containing the courses that are not included in the study plan
     """
-    other_courses = {} # other courses that dont exist in the neither compulsory nor the electives
+    other_courses = {} # other courses that dont exist in the neither compulsory nor the electives 
 
     with open(filename, 'r') as f:
         json_date = json.load(f)
@@ -219,23 +220,24 @@ def read_sections(filename, compulsory_courses: dict[str, Course], elective_cour
                 start, end = value.split(" - ")
 
                 # split hours and minutes for the start time
-                hours, minutes = map(int, start.split(':'))
+                hours, minutes = map( int, start.split(':') )
                 section.set_start_time( timedelta(hours=hours, minutes=minutes) )
 
                 # split hours and minutes for the start time
-                hours, minutes = map(int, end.split(':'))
+                hours, minutes = map( int, end.split(':') )
                 section.set_end_time( timedelta(hours=hours, minutes=minutes) )
 
         # check if the courses exists in compulsory, or elective courses
         if c:=compulsory_courses.get(course_code):
             c.get_sections().append(section)
         elif c:=elective_courses.get(course_code):
-            c.get_sections().append(course_code)
+            c.get_sections().append(section)
         else:
             credit_hours = int(course_code[5]) if course_code[5].isnumeric() else 0
 
             # create new course
             new_course = Course(course_code, credit_hours)
+            Course.num_courses += 1
 
             # add the section to the new course
             new_course.get_sections().append(section)

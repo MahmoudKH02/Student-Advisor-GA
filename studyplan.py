@@ -8,7 +8,6 @@ class StudyPlan:
         self.name = name
         self.total_credit_hours = total_hours
         self.courses: dict[str, list] = {}
-        self.elective_courses = set()
 
 
     def get_total_hours(self):
@@ -25,10 +24,6 @@ class StudyPlan:
 
     def get_name(self, name):
         self.name = name
-
-
-    def get_electives(self) -> set:
-        return self.elective_courses
 
 
     def get_courses(self) -> dict:
@@ -86,6 +81,7 @@ def read_study_plan(filename):
                     credit_hours=credit_hours,
                     prerequisists=info[3:]
                 )
+                Course.num_courses += 1
 
                 # add the course to the courses dict
                 study_courses[ course_code ] = course
@@ -122,8 +118,7 @@ def read_electives(filename, study_plan: StudyPlan):
                 credit_hours=credit_hours,
                 prerequisists=info[2:]
             )
-
-            study_plan.get_electives().add(info[1])
+            Course.num_courses += 1
 
             course.group = int(info[0])
 
