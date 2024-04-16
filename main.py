@@ -1,5 +1,6 @@
 import studyplan
 from courses import read_sections
+from collections import namedtuple
 
 
 def main():
@@ -19,6 +20,17 @@ def main():
     print(elective_courses)
 
     # print(other_courses)
+    
+    ape_chromosome = [
+        ("MATH1411", compulsory_courses["MATH1411"].get_sections()[0]),
+        ("PHYS141", compulsory_courses["PHYS141"].get_sections()[0]),
+        ("ENME120", compulsory_courses["ENME120"].get_sections()[0]),
+        ("ARAB135", compulsory_courses["ARAB135"].get_sections()[0]),
+        ("ENGC1201", compulsory_courses["ENGC1201"].get_sections()[0])
+    ]
+    print(ape_chromosome)
+
+    normal_chromosome = []
 
 
 if __name__ == '__main__':

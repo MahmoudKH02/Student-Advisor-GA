@@ -155,7 +155,7 @@ class Section:
             time: {self.__start_time}-{self.__end_time}\n'
 
 
-    def has_conflict(self, other_section: 'Section') -> bool:
+    def has_conflict(self, other_section: 'Section'):
         """
         returns weather the refrenced Section object has time conflict with other_section
 

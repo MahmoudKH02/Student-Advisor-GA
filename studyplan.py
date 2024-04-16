@@ -1,5 +1,6 @@
 from courses import Course
 from courses import calculate_prerequisists_priority
+from typing import Dict, List, Tuple
 
 
 class StudyPlan:
@@ -7,7 +8,7 @@ class StudyPlan:
     def __init__(self, name=None, total_hours=None) -> None:
         self.name = name
         self.total_credit_hours = total_hours
-        self.courses: dict[str, list] = {}
+        self.courses: Dict[str, List] = {}
 
 
     def get_total_hours(self):
@@ -44,7 +45,7 @@ class StudyPlan:
             \nCourses: {self.courses}'
 
 
-def read_study_plan(filename):
+def read_study_plan(filename) -> Tuple[List, Dict[str, Course]]:
     """
     Reads the Study Plan from a .txt file.
 
