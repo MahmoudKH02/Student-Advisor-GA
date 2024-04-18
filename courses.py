@@ -7,10 +7,10 @@ class Course:
 
     num_courses = 0
     
-    def __init__( self, course_id=None, credit_hours=None, prerequisists=[] ):
+    def __init__( self, course_id=None, credit_hours=None, prerequisites=[] ):
         self.__id = course_id
         self.__credit_hours = credit_hours
-        self.__prerequisists = prerequisists
+        self.__prerequisites = prerequisites
         self.__priority = 0
         self.__passed = False
         self.__sections: List[Section] = []
@@ -28,20 +28,20 @@ class Course:
         return self.__credit_hours
 
     
-    def get_prerequisists(self) -> List:
-        return self.__prerequisists
+    def get_prerequisites(self) -> List:
+        return self.__prerequisites
     
     
-    def set_prerequisists(self, pre):
-        self.__prerequisists = pre
+    def set_prerequisites(self, pre):
+        self.__prerequisites = pre
     
 
     def get_priority(self):
         return self.__priority
     
 
-    def inc_priority(self):
-        self.__priority += 1
+    def increase_priority(self, by=1):
+        self.__priority += by
 
 
     def is_passed(self):
@@ -50,6 +50,11 @@ class Course:
 
     def pass_course(self):
         self.__passed = True
+        self.__priority = 0 # no priority for finished courses
+
+
+    def is_available(self):
+        return len(self.__prerequisites) == 0
     
 
     def get_sections(self):
@@ -62,29 +67,29 @@ class Course:
 
     def __repr__(self) -> str:
         return f'CourseCode: {self.__id} | Credit Hours: {self.__credit_hours} \
-            \nPreReq: {self.__prerequisists} | Priority: {self.__priority}\n \
+            \nPreReq: {self.__prerequisites} | Priority: {self.__priority}\n \
             Sections: {self.__sections}\n-----------------\n'
 
 
-def calculate_prerequisists_priority(courses_dict: Dict[str, Course], prerequisists):
+def calculate_prerequisites_priority(courses_dict: Dict[str, Course], prerequisites):
     """
-    Calculate the priority of each prerequisist course depending on the number
-    of courses that this course is prerequisist for.
-    Iterate throught the courses inside prerequisists, and increase the priority of these courses.
+    Calculate the priority of each prerequisites course depending on the number
+    of courses that this course is prerequisites for.
+    Iterate through the courses inside prerequisites, and increase the priority of these courses.
 
     Args:
         * course_dict -- a dict of all courses.
-        * prerequisists -- a list of prerequests.
+        * prerequisites -- a list of prerequisites.
     
     Modifies:
-        modifies the __priority attribute in all courses inside the prerequisists
+        modifies the __priority attribute in all courses inside the prerequisites
 
     Returns: None
     """
-    for pre in prerequisists:
+    for pre in prerequisites:
 
         if c := courses_dict.get(pre):
-            c.inc_priority()
+            c.increase_priority()
 
 
 # ----------- Course Section Class -----------
@@ -156,12 +161,12 @@ class Section:
 
     def has_conflict(self, other_section: 'Section'):
         """
-        Returns weather the refrenced Section object has time conflict with other_section.
+        Returns weather the referenced Section object has time conflict with other_section.
 
         Args:
             other_section -- an instance of type Section, which is the other_section to check for time conflict with.
 
-        Retrurns:
+        Returns:
         True if there is conflict in time and day, False if not.
         """
         if other_section is self:
@@ -180,7 +185,7 @@ def read_sections(filename, college_courses: Dict[str, Course]) -> Dict[str, Cou
 
     Args:
         * filename -- Name for a JSON file, which contains sections and the section details.
-        * college_courses -- a dictionary containing the courses with course code as the key, and Coruse as value.
+        * college_courses -- a dictionary containing the courses with course code as the key, and Course as value.
 
     Modifies:
         college_courses. the sections that are read from the json file (course Browser) are added to the correct course if it exists.

@@ -1,4 +1,4 @@
-Group,CourseCode,Prerequisists
+Group,CourseCode,Prerequisites
 1,ENCS5321,ENCS3320
 1,ENCS5322,ENCS4320
 1,ENCS5323,ENEE3309,ENCS3320

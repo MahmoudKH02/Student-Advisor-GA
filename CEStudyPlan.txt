@@ -1,4 +1,4 @@
-Year,Semster,CourseCode,Prerequisists
+Year,Seamster,CourseCode,Prerequisites
 1,1,MATH1411
 1,1,PHYS141
 1,1,PHYS111
@@ -58,5 +58,5 @@ Year,Semster,CourseCode,Prerequisists
 5,2,ENCS5300,ENCS5200,ENCS4300
 5,2,ENCS53xx
 5,2,ENCS51xx
-5,2,ENCS5150
+5,2,ENCS5150, CH-115
 5,2,UE
