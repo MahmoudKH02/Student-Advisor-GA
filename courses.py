@@ -1,4 +1,5 @@
 from datetime import timedelta
+from typing import Dict, Set, List
 import json
 
 
@@ -12,7 +13,7 @@ class Course:
         self.__prerequisists = prerequisists
         self.__priority = 0
         self.__passed = False
-        self.__sections: list[Section] = []
+        self.__sections: List[Section] = []
 
 
     def get_course_id(self):
@@ -27,11 +28,11 @@ class Course:
         return self.__credit_hours
 
     
-    def get_prerequisists(self) -> list:
+    def get_prerequisists(self) -> List:
         return self.__prerequisists
     
     
-    def set_prerequisists(self, pre: list):
+    def set_prerequisists(self, pre):
         self.__prerequisists = pre
     
 
@@ -60,20 +61,18 @@ class Course:
 
 
     def __repr__(self) -> str:
-        s = f'| Group: {self.group}' if hasattr(self, 'group') else ''
-
-        return f'CourseCode: {self.__id} | Credit Hours: {self.__credit_hours} {s} \
+        return f'CourseCode: {self.__id} | Credit Hours: {self.__credit_hours} \
             \nPreReq: {self.__prerequisists} | Priority: {self.__priority}\n \
             Sections: {self.__sections}\n-----------------\n'
 
 
-def calculate_prerequisists_priority(courses_dict: dict[str, Course], prerequisists):
+def calculate_prerequisists_priority(courses_dict: Dict[str, Course], prerequisists):
     """
     Calculate the priority of each prerequisist course depending on the number
     of courses that this course is prerequisist for.
     Iterate throught the courses inside prerequisists, and increase the priority of these courses.
 
-    Arguments:
+    Args:
         * course_dict -- a dict of all courses.
         * prerequisists -- a list of prerequests.
     
@@ -126,7 +125,7 @@ class Section:
         self.__instructor = instructor
 
 
-    def get_days(self) -> set:
+    def get_days(self) -> Set:
         return self.__days
 
 
@@ -157,14 +156,17 @@ class Section:
 
     def has_conflict(self, other_section: 'Section'):
         """
-        returns weather the refrenced Section object has time conflict with other_section
+        Returns weather the refrenced Section object has time conflict with other_section.
 
-        Arguments:
-        other_section -- an instance of type Section, which is the other_section to check for time conflict with.
+        Args:
+            other_section -- an instance of type Section, which is the other_section to check for time conflict with.
 
         Retrurns:
         True if there is conflict in time and day, False if not.
         """
+        if other_section is self:
+            return False
+
         return self.__days.intersection( other_section.get_days() ) \
             and ( 
                 (other_section.get_start_time() <= self.__start_time < other_section.get_end_time())
@@ -172,32 +174,27 @@ class Section:
             )
 
 
-def read_sections(filename, compulsory_courses: dict[str, Course], elective_courses: dict[str, Course]):
+def read_sections(filename, college_courses: Dict[str, Course]) -> Dict[str, Course]:
     """
     Read the sections from the course browser.
 
-    Arguments:
+    Args:
         * filename -- Name for a JSON file, which contains sections and the section details.
-        * compulsory_courses -- a dictionary containing the compulsory courses with course code as the key, and Coruse as value.
-        * elective_courses -- a dictionary containing the elective courseswith course code as the key, and Coruse as value.
+        * college_courses -- a dictionary containing the courses with course code as the key, and Coruse as value.
 
     Modifies:
-        * compulsory_courses.
-        * elective_courses.
-            the sections that are read from the json file (course Browser) are added to the correct course if it exists in either.
+        college_courses. the sections that are read from the json file (course Browser) are added to the correct course if it exists.
 
     Returns:
         other_courses -- a dictionary containing the courses that are not included in the study plan
     """
-    other_courses = {} # other courses that dont exist in the neither compulsory nor the electives 
-
     with open(filename, 'r') as f:
         json_date = json.load(f)
 
     for section_id, section_details in json_date.items():
 
         course_code, section_type, section_num = section_id.split('-')
-
+        
         section = Section(
             number=int(section_num),
             sec_type=section_type
@@ -212,7 +209,7 @@ def read_sections(filename, compulsory_courses: dict[str, Course], elective_cour
             else:
                 section.get_days().add(key)
 
-                # if the time is already set, no need to recreate it
+                # check if the time is already set, no need to recreate it
                 if section.get_start_time() and section.get_end_time():
                     continue
 
@@ -227,22 +224,22 @@ def read_sections(filename, compulsory_courses: dict[str, Course], elective_cour
                 hours, minutes = map( int, end.split(':') )
                 section.set_end_time( timedelta(hours=hours, minutes=minutes) )
 
-        # check if the courses exists in compulsory, or elective courses
-        if c:=compulsory_courses.get(course_code):
-            c.get_sections().append(section)
-        elif c:=elective_courses.get(course_code):
+        # check if the course already exists
+        if c := college_courses.get(course_code):
             c.get_sections().append(section)
         else:
-            credit_hours = int(course_code[5]) if course_code[5].isnumeric() else 0
+            # add the course to college courses (not needed for now).
+            pass
+            # credit_hours = int(course_code[5]) if course_code[5].isnumeric() else 0
 
-            # create new course
-            new_course = Course(course_code, credit_hours)
-            Course.num_courses += 1
+            # # create new course
+            # new_course = Course(course_code, credit_hours)
+            # Course.num_courses += 1
 
-            # add the section to the new course
-            new_course.get_sections().append(section)
+            # # add the section to the new course
+            # new_course.get_sections().append(section)
 
-            # add the course to other_courses
-            other_courses[ new_course.get_course_id() ] = new_course
+            # # add the course to other_courses
+            # college_courses[ new_course.get_course_id() ] = new_course
 
-    return other_courses
+    return college_courses

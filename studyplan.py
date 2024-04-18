@@ -6,61 +6,58 @@ from typing import Dict, List, Tuple
 class StudyPlan:
 
     def __init__(self, name=None, total_hours=None) -> None:
-        self.name = name
-        self.total_credit_hours = total_hours
-        self.courses: Dict[str, List] = {}
-
-
-    def get_total_hours(self):
-        return self.total_credit_hours
-    
-
-    def set_total_hours(self, hours):
-        self.total_credit_hours = hours
+        self.__name = name
+        self.__total_credit_hours = total_hours
+        self.__compulsory_courses: Dict[str, List] = {}
+        self.__elective_courses: Dict[str, List] = {}
 
 
     def get_name(self):
-        return self.name
+        return self.__name
     
 
     def get_name(self, name):
-        self.name = name
+        self.__name = name
 
 
-    def get_courses(self) -> dict:
-        return self.courses
+    def get_total_hours(self):
+        return self.__total_credit_hours
+    
+
+    def set_total_hours(self, hours):
+        self.__total_credit_hours = hours
 
 
-    def add_course_to_plan(self, course_code, year, sem):
-        key = str(year) + "-" + str(sem)
+    def get_compusory_courses(self) -> Dict[str, List]:
+        return self.__compulsory_courses
 
-        if not self.courses.get(key):
-            self.courses[key] = []
 
-        self.courses[key].append(course_code)
+    def get_elective_courses(self) -> Dict[str, List]:
+        return self.__elective_courses
 
 
     def __repr__(self) -> str:
-        return f'Name: {self.name} | Total Hours: {self.total_credit_hours} \
-            \nCourses: {self.courses}'
+        return f'Name: {self.__name} | Total Hours: {self.__total_credit_hours} \
+            \nCourses: {self.__compulsory_courses}\nElectives {self.__elective_courses}'
 
 
-def read_study_plan(filename) -> Tuple[List, Dict[str, Course]]:
+def read_study_plan(filename) -> Tuple[StudyPlan, Dict[str, Course]]:
     """
     Reads the Study Plan from a .txt file.
 
-    Arguments:
+    Args:
         filename -- a file name that contains the study plan as a (.txt) file.
     
     Returns:
         * study_plan -- an object of type (StudyPlan) containing:
                     The name of the specialization.
                     The total credit hours.
-                    A list of courses in this specialization, ordered with respect to year and semester.
-        * study_courses --  dictionary that has the course_code as the key, and the value as an object of type Courase.
+                    A dictionary of list of courses representing each semester and the courses asociated with the study plan,
+                        ordered with respect to year and semester.
+        * college_courses --  dictionary that has the course_code as the key, and the value as an object of type Course.
     """
-    study_plan = StudyPlan("computer Engineering", 158)
-    study_courses = {}
+    study_plan = StudyPlan("Computer Engineering", 158)
+    college_courses = {}
     
     with open(filename, 'r') as f:
         lines = f.readlines()[1:]
@@ -68,11 +65,16 @@ def read_study_plan(filename) -> Tuple[List, Dict[str, Course]]:
         # iterate through each line
         for line in lines:
             info = line.strip().split(',')
-
+            
             year, sem, course_code = info[:3]
+            prereq = info[3:]
 
-            # add the course to the courses list of the study plan
-            study_plan.add_course_to_plan(course_code, year, sem)
+            # create a new semester if it doesn't exist in the study plan
+            if not study_plan.get_compusory_courses().get(str(year) + "-" + str(sem)):
+                study_plan.get_compusory_courses()[ str(year) + "-" + str(sem) ] = []
+
+            # add the course to the corresponding semester in the study plan
+            study_plan.get_compusory_courses()[ str(year) + "-" + str(sem) ].append(course_code)
 
             if (len(course_code) > 5) and (course_code not in ['ENCS53xx', 'ENCS51xx']):
                 credit_hours = int(course_code[5])
@@ -80,30 +82,32 @@ def read_study_plan(filename) -> Tuple[List, Dict[str, Course]]:
                 course = Course(
                     course_id=course_code,
                     credit_hours=credit_hours,
-                    prerequisists=info[3:]
+                    prerequisists=prereq
                 )
                 Course.num_courses += 1
 
                 # add the course to the courses dict
-                study_courses[ course_code ] = course
+                college_courses[ course_code ] = course
 
-            calculate_prerequisists_priority( study_courses, course.get_prerequisists() )
-            
-    return study_plan, study_courses
+            calculate_prerequisists_priority( college_courses, prereq )
+
+    return study_plan, college_courses
 
 
-def read_electives(filename, study_plan: StudyPlan):
+def read_electives(
+        filename,
+        study_plan: StudyPlan,
+        college_courses: Dict[str, Course]
+) -> Dict[str, Course]:
     """
     Read the elective courses from a .txt file
 
-    Arguments:
+    Args:
         filename -- the file name contating the elective courses as a (.txt) file.
 
     Returns:
         elective_courses -- a dictionary that has the course_code as the key, and the value as an object of type Course.
     """
-    electives = {}
-
     with open(filename, 'r') as f:
         lines = f.readlines()[1:]
 
@@ -111,21 +115,29 @@ def read_electives(filename, study_plan: StudyPlan):
         for line in lines:
             info = line.strip().split(',')
 
+            group, course_code = info[:2]
+            prereq = info[2:]
+
             # get the credit hours from course code
-            credit_hours = int(info[1][5])
+            credit_hours = int(course_code[5])
 
             course = Course(
-                course_id=info[1],
+                course_id=course_code,
                 credit_hours=credit_hours,
-                prerequisists=info[2:]
+                prerequisists=prereq
             )
             Course.num_courses += 1
 
-            course.group = int(info[0])
-
             # add the course to the elective dict
-            electives[ info[1] ] = course
+            college_courses[ course_code ] = course
 
-            calculate_prerequisists_priority( electives, info[2:] )
+            # create a new group if it doesn't exist in the elective courses
+            if not study_plan.get_elective_courses().get(group):
+                study_plan.get_elective_courses()[ group ] = []
 
-    return electives
+            # add the course to the corresponding group in the elective courses
+            study_plan.get_elective_courses()[ group ].append(course_code)
+
+            calculate_prerequisists_priority( college_courses, prereq )
+
+    return college_courses
