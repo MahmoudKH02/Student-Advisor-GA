@@ -156,7 +156,7 @@ class Section:
 
     def __repr__(self) -> str:
         return f'ID: {self.__number}-{self.__type} | Days: {self.__days} \
-            time: {self.__start_time}-{self.__end_time}\n'
+            time: {self.__start_time}-{self.__end_time}'
 
 
     def has_conflict(self, other_section: 'Section'):
