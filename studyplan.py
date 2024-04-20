@@ -5,7 +5,7 @@ from typing import Dict, List, Tuple
 
 class StudyPlan:
 
-    def __init__(self, name=None, total_hours=None) -> None:
+    def __init__(self, name=None, total_hours=0) -> None:
         self.__name = name
         self.__total_credit_hours = total_hours
         self.__compulsory_courses: Dict[str, List] = {}
@@ -41,7 +41,13 @@ class StudyPlan:
             \nCourses: {self.__compulsory_courses}\nElectives {self.__elective_courses}'
 
 
-def read_study_plan(filename, spec_name, total_hours) -> Tuple[StudyPlan, Dict[str, Course]]:
+def read_study_plan(
+        filename,
+        spec_name,
+        total_hours,
+        student_year,
+        student_semester
+) -> Tuple[StudyPlan, Dict[str, Course]]:
     """
     Reads the Study Plan from a .txt file.
 
@@ -86,8 +92,14 @@ def read_study_plan(filename, spec_name, total_hours) -> Tuple[StudyPlan, Dict[s
             )
             Course.num_courses += 1
 
+            # Check the student_year and semester and set priority accordingly.
+            if year == student_year and sem == student_semester:
+                course.increase_priority( by=2 )
+            elif year == student_year:
+                course.increase_priority( by=1 )
+
             # add the course to the courses dict
-            college_courses[ course_code ] = course
+            college_courses[course_code] = course
 
         calculate_prerequisites_priority( college_courses, prereq )
 

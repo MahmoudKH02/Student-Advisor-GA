@@ -7,7 +7,7 @@ class Course:
 
     num_courses = 0
     
-    def __init__( self, course_id=None, credit_hours=None, prerequisites=[] ):
+    def __init__( self, course_id=None, credit_hours=0, prerequisites=[] ):
         self.__id = course_id
         self.__credit_hours = credit_hours
         self.__prerequisites = prerequisites
@@ -69,6 +69,33 @@ class Course:
         return f'CourseCode: {self.__id} | Credit Hours: {self.__credit_hours} \
             \nPreReq: {self.__prerequisites} | Priority: {self.__priority}\n \
             Sections: {self.__sections}\n-----------------\n'
+    
+
+def read_student_records(filename, college_courses: Dict[str, Course]):
+    """
+    Reads the courses the student has taken/passed/failed from a txt file.
+
+    Args:
+        * filename --
+        * college_courses -- 
+
+    Returns:
+        None
+    """
+    with open(filename, 'r') as f:
+        lines = f.readlines()
+
+    for line in lines:
+        course_code, mark = line.strip().split('=')
+
+        if mark >= 60:
+            college_courses[course_code].pass_course()
+
+            # Remove the course from prerequisites lists
+            for course in college_courses.values():
+
+                if course_code in course.get_prerequisites():
+                    course.get_prerequisites().remove(course_code)
 
 
 def calculate_prerequisites_priority(courses_dict: Dict[str, Course], prerequisites):

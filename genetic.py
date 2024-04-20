@@ -39,51 +39,55 @@ def fitness(
 
     Args:
         * chromosome -- ...
+        * college_courses -- ...
         * preference -- a dictionary containing the preference for the student:
             - Credit Hours: <credit_hours>,
-            - Preferred Instructors: [<instructor-1>, <instructor-2>, ...],
+            - Preferred Instructors: <instructor>,
             - days-off: <days_off>,
             - max hours per day: <max_hours_day>, ---> not implemented yet
             - soft_preference: <True or False> (default True) ---> not implemented yet
 
             hard preferences means that the algorithm should not generate a solution that breaks the preference
-        * college_courses -- ...
     """
     MAX_DAYS = 5
     
     score = 0
     credit_hours = 0 # used to satisfy the Credit Hours preference
     occupied_days = set() # used to satisfy the days-off preference
+    instructors = set()
 
     for gene in chromosome:
         score -= ( (count_gene_collisions(gene, chromosome) / 2) * 10 )
 
-        # highly penalize finished courses
+        # Highly penalize finished courses
         score -= (college_courses[ gene[0] ].is_passed() * 10)
 
-        # add the priority of the course as a score
+        # Add the priority of the course as a score
         score += college_courses[ gene[0] ].get_priority()
         
-        # add the days of this section as occupied days.
+        # Add the days of this section as occupied days.
         occupied_days.update( gene[1].get_days() )
+
+        # Add the instructor to instructors set
+        instructors.add( gene[1].get_instructor() )
         
-        # add the credit hours of the course
+        # Add the credit hours of the course
         credit_hours += college_courses[ gene[0] ].get_credit_hours()
+    
+    # Penalize unmatching instructor preference
+    if prefered_instructor:= preferences.get("instructor"):
+        
+        if prefered_instructor not in instructors:
+            score -= 5
 
-        # check the preferences of instructor
-        if preferences.get("instructor"):
+    # increase score by 1 for each day-off
+    if preferred_days_off:= preferences.get("days-off"):
+        days_off = ( MAX_DAYS - len(occupied_days) )
+        score += ( preferred_days_off - abs(preferred_days_off - days_off) )
 
-            if gene[1].get_instructor() in preferences.get("instructor"):
-                score += 1
-
-        # increase score by 1 for each day-off
-        if preferred_days_off:=preferences.get("days-off"):
-            days_off = ( MAX_DAYS - len(occupied_days) )
-            score += ( preferred_days_off - abs(preferred_days_off - days_off) )
-
-        # check credit hours preference
-        if preferred_credit_hours:=preferences.get("credit"):
-            score -= abs(preferred_credit_hours - credit_hours)
+    # Penalize unmathced credit houres preference
+    if preferred_credit_hours:= preferences.get("credit"):
+        score -= abs(preferred_credit_hours - credit_hours)
 
     return score
 
@@ -154,5 +158,5 @@ def mutate(mutation_rate):
     pass
 
 
-def run_ga(**kwargs):
+def run_ga(initial_pool, college_courses, **kwargs):
     pass
