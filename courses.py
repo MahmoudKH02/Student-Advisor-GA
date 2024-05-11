@@ -221,9 +221,9 @@ def read_sections(filename, college_courses: Dict[str, Course]) -> Dict[str, Cou
         other_courses -- a dictionary containing the courses that are not included in the study plan
     """
     with open(filename, 'r') as f:
-        json_date = json.load(f)
+        json_data = json.load(f)
 
-    for section_id, section_details in json_date.items():
+    for section_id, section_details in json_data.items():
 
         course_code, section_type, section_num = section_id.split('-')
         

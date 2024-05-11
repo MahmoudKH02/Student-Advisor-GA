@@ -115,7 +115,9 @@ def read_electives(
     Read the elective courses from a .txt file
 
     Args:
-        filename -- the file name containing the elective courses as a (.txt) file.
+        * filename -- the file name containing the elective courses as a (.txt) file.
+        * study_plan -- 
+        * college_courses -- 
 
     Returns:
         elective_courses -- a dictionary that has the course_code as the key, and the value as an object of type Course.
