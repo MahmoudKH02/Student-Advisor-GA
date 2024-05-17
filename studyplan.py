@@ -16,7 +16,7 @@ class StudyPlan:
         return self.__name
     
 
-    def get_name(self, name):
+    def set_name(self, name):
         self.__name = name
 
 

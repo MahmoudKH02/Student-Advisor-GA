@@ -215,7 +215,7 @@ def read_sections(filename, college_courses: Dict[str, Course]) -> Dict[str, Cou
         * college_courses -- a dictionary containing the courses with course code as the key, and Course as value.
 
     Modifies:
-        college_courses. the sections that are read from the json file (course Browser) are added to the correct course if it exists.
+        college_courses -- the sections that are read from the json file (course Browser) are added to the correct course if it exists.
 
     Returns:
         other_courses -- a dictionary containing the courses that are not included in the study plan

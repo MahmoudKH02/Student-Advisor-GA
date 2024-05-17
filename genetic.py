@@ -81,11 +81,12 @@ def fitness(
         credit_hours += college_courses[ gene[0] ].get_credit_hours()
     
     # Penalize unmatched instructor preference
-    if preferred_instructor:= preferences.get("instructor"):
+    if preferences.get("instructor") == gene[1].get_instructor():
+        score += 5
         
-        if preferred_instructor in instructors:
+        # if preferred_instructor in instructors:
             # score -= 5
-            score += 5
+            # score += 5
 
     # increase score by 1 for each day-off
     if preferred_days_off:= preferences.get("days_off"):
@@ -190,7 +191,7 @@ def roulette_wheel_selection(population, pop_fitness, total_fitness):
     return selected_parents
 
 
-def run_ga(initial_pool, college_courses, **kwargs):
+def run_ga(initial_pool, college_courses, **kwargs) -> Tuple[ List[Tuple[str, Section]], int ]:
 
     assert all(key in ['instructor', 'days_off', 'credit_hours'] for key in kwargs.keys()), 'Unexpected preference'
 
@@ -211,7 +212,7 @@ def run_ga(initial_pool, college_courses, **kwargs):
 
         # Calculate the fitness for population
         for chromosome in population:
-            fit = fitness(chromosome, college_courses)
+            fit = fitness(chromosome, college_courses, preferences=kwargs)
             total_fitness += fit
             pop_fitness.append(fit)
 
@@ -222,7 +223,7 @@ def run_ga(initial_pool, college_courses, **kwargs):
     fitness_max = 0
 
     for i, individual in enumerate(parents):
-        ind_fitness = fitness(individual, college_courses)
+        ind_fitness = fitness(individual, college_courses, preferences=kwargs)
 
         if ind_fitness > fitness_max:
             fitness_max = ind_fitness

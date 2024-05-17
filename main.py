@@ -64,8 +64,13 @@ def main():
 
     college_courses = read_sections('courseBrowser_1.json', college_courses)
     print(college_courses)
+
+    best_schedule, best_schedule_fitness = run_ga(create_courses_pool(college_courses, CE_study_plan), college_courses, instructor='Mohammad Y. M. Alkhanafseh', days_off=0)
     
-    print(run_ga(create_courses_pool(college_courses, CE_study_plan), college_courses, instructor='hello', days_off='world'))
+    print('best:', best_schedule)
+    print('fitness:', best_schedule_fitness)
+
+    print('\n'.join( [section[1].get_instructor() for section in best_schedule] ))
 
 
 if __name__ == '__main__':
