@@ -1,7 +1,7 @@
 ***This Project is still under Development...***
 
 # Main Idea
-Using the Genetic Algorithm to select the most fitted schedule for the student semester, based on multiple factors according to college regulations, as well as the user (student) preferences.
+The Genetic Algorithm is used to assign courses, the days and times for these courses, to finally select the most fitted schedule for a student in the upcoming semester, based on multiple factors according to college regulations, as well as the user (student) preferences.
 
 ---
 # Introduction
